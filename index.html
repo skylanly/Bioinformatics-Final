@@ -4,7 +4,23 @@
   <title>Bioinformatics</title>
 </head>
 <script>
+  function show_query(data){
+    document.getElementById("output").innerHTML = "Term found."
+    document.getElementById("term-id").innerHTML = data["accession"];
+    document.getElementById("term-name").innerHTML = data["name"];
+    document.getElementById("term-ns").innerHTML = data["namespace"];
+    document.getElementById("term-def").innerHTML = data["definition"];
+    document.getElementById("term-syn").innerHTML = data["synonyms"];
+    document.getElementById("term-output").style["display"] = "block";
+    console.log(data)
+  }
+  function error_query(){
+    document.getElementById("output").innerHTML = "Not a valid term."
+  }
   function query(){
+    document.getElementById("output").innerHTML = "Querying, please wait."
+    document.getElementById("term-output").style["display"] = "none";
+    document.getElementById("pmid-output").style["display"] = "none";
     name=document.getElementById("Term").value;
     var xhttp = new XMLHttpRequest();
     var url = "https://grch37.rest.ensembl.org/ontology/name/"+name+"?";
@@ -13,7 +29,12 @@
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.send();
     var response = JSON.parse(xhttp.responseText);
-    document.getElementById("output").innerHTML=JSON.stringify(response);
+    if(response["error"]){
+      error_query();  
+    }
+    else{
+      show_query(response[0]);
+    }
   }
   function search(){
     pmid=document.getElementById("PMID").value;
@@ -33,6 +54,15 @@
   <button type="button" onclick="query()">Query term</button><br>
   <input type="text" id="PMID" name="PMID" value="26318936">
   <button type="button" onclick="search()">Search PMID</button>
-  <p id="output">
+  <p id="output"></p>
+  <p id="term-output" style="display: none">
+    <span>id:&nbsp;</span><span id="term-id"></span><br/>
+    <span>name:&nbsp;</span><span id="term-name"></span><br/>
+    <span>namespace:&nbsp;</span><span id="term-ns"></span><br/>
+    <span>def:&nbsp;</span><span id="term-def"></span><br/>
+    <span>synonym:&nbsp;</span><span id="term-syn"></span><br/>
+  </p>
+  <p id="pmid-output">
+  </p>
 </body>
 </html>
