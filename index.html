@@ -7,7 +7,7 @@
   function query(){
     name=document.getElementById("Term").value;
     var xhttp = new XMLHttpRequest();
-    var url = "http://grch37.rest.ensembl.org/ontology/name/"+name+"?";
+    var url = "https://grch37.rest.ensembl.org/ontology/name/"+name+"?";
     console.log(url)
     xhttp.open("GET", url , false);
     xhttp.setRequestHeader("Content-type", "application/json");
@@ -18,7 +18,7 @@
   function search(){
     pmid=document.getElementById("PMID").value;
     var xhttp = new XMLHttpRequest();
-    var url = "http://grch37.rest.ensembl.org/variation/human/pmid/"+pmid+"?";
+    var url = "https://grch37.rest.ensembl.org/variation/human/pmid/"+pmid+"?";
     console.log(url)
     xhttp.open("GET", url , false);
     xhttp.setRequestHeader("Content-type", "application/json");
