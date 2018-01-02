@@ -3,11 +3,36 @@
 <head>
   <title>Bioinformatics</title>
 </head>
+<script>
+  function query(){
+    name=document.getElementById("Term").value;
+    var xhttp = new XMLHttpRequest();
+    var url = "http://grch37.rest.ensembl.org/ontology/name/"+name+"?";
+    console.log(url)
+    xhttp.open("GET", url , false);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send();
+    var response = JSON.parse(xhttp.responseText);
+    document.getElementById("output").innerHTML=JSON.stringify(response);
+  }
+  function search(){
+    pmid=document.getElementById("PMID").value;
+    var xhttp = new XMLHttpRequest();
+    var url = "http://grch37.rest.ensembl.org/variation/human/pmid/"+pmid+"?";
+    console.log(url)
+    xhttp.open("GET", url , false);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send();
+    var response = JSON.parse(xhttp.responseText);
+    document.getElementById("output").innerHTML=JSON.stringify(response);
+  }
+</script>
 <body>
-  <button type="button">Show all data</button><br>
-  <input type="text" name="Term" value="mitochondrion inheritance">
-  <button type="button">Query term</button><br>
-  <input type="text" name="PMID" value="26318936">
-  <button type="button">Search PMID</button>
+  <button type="button" onclick="">Show all data</button><br>
+  <input type="text" id="Term" name="Term" value="mitochondrion inheritance">
+  <button type="button" onclick="query()">Query term</button><br>
+  <input type="text" id="PMID" name="PMID" value="26318936">
+  <button type="button" onclick="search()">Search PMID</button>
+  <p id="output">
 </body>
 </html>
