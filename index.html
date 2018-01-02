@@ -4,48 +4,70 @@
   <title>Bioinformatics</title>
 </head>
 <script>
+  // get JSON data and update data block
   function show_query(data){
+    // update data
     document.getElementById("output").innerHTML = "Term found."
     document.getElementById("term-id").innerHTML = data["accession"];
     document.getElementById("term-name").innerHTML = data["name"];
     document.getElementById("term-ns").innerHTML = data["namespace"];
     document.getElementById("term-def").innerHTML = data["definition"];
     document.getElementById("term-syn").innerHTML = data["synonyms"];
+    // let output visible
     document.getElementById("term-output").style["display"] = "block";
-    console.log(data)
   }
-  function error_query(){
-    document.getElementById("output").innerHTML = "Not a valid term."
-  }
+  // make a name query to database
   function query(){
+    // waiting message
     document.getElementById("output").innerHTML = "Querying, please wait."
     document.getElementById("term-output").style["display"] = "none";
     document.getElementById("pmid-output").style["display"] = "none";
+    // make request
     name=document.getElementById("Term").value;
     var xhttp = new XMLHttpRequest();
     var url = "https://grch37.rest.ensembl.org/ontology/name/"+name+"?";
-    console.log(url)
     xhttp.open("GET", url , false);
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.send();
     var response = JSON.parse(xhttp.responseText);
+    // if request failed then error element will be a non-empty string
     if(response["error"]){
-      error_query();  
+      document.getElementById("output").innerHTML = "Not a valid term."
     }
     else{
       show_query(response[0]);
     }
   }
+  // make a PMID search
   function search(){
+    document.getElementById("output").innerHTML = "PMID searching"
+    document.getElementById("term-output").style["display"] = "none";
+    document.getElementById("pmid-output").style["display"] = "none";
+    // use CORS proxy to get cross-domain data from PubMed
     pmid=document.getElementById("PMID").value;
     var xhttp = new XMLHttpRequest();
-    var url = "https://grch37.rest.ensembl.org/variation/human/pmid/"+pmid+"?";
+    var url = "https://cors-anywhere.herokuapp.com/https://www.ncbi.nlm.nih.gov/pubmed/"+pmid;
     console.log(url)
     xhttp.open("GET", url , false);
-    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.setRequestHeader("Content-type", "text/plain");
     xhttp.send();
-    var response = JSON.parse(xhttp.responseText);
-    document.getElementById("output").innerHTML=JSON.stringify(response);
+    var response = xhttp.responseText;
+    parser = new DOMParser();
+    // get the DOM of a whole page
+    xml = parser.parseFromString(response,"text/xml").documentElement.innerHTML;
+    // parse body part of DOM
+    html = parser.parseFromString(xml,"text/html");
+    // abstract part has an unique tag name
+    var element = html.getElementsByTagName("abstracttext")[0];
+    if(element){
+      document.getElementById("output").innerHTML = "PMID found."
+      var text = element.innerHTML;
+      document.getElementById("pmid-output").innerHTML = text;
+      document.getElementById("pmid-output").style["display"] = "block";
+    }
+    else{
+      document.getElementById("output").innerHTML = "Not a valid PMID."
+    }
   }
 </script>
 <body>
