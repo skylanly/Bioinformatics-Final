@@ -69,8 +69,16 @@
       document.getElementById("output").innerHTML = "Not a valid PMID."
     }
   }
+  (function load(){
+    var xhttp = new XMLHttpRequest();
+    xhttp.open("GET", "words_alpha.txt" , false);
+    xhttp.setRequestHeader("Content-type", "text/plain");
+    xhttp.send();
+    var response = xhttp.responseText;
+    words_list = response.split("\r\n");
+  })();
 </script>
-<body>
+<body >
   <button type="button" onclick="">Show all data</button><br>
   <input type="text" id="Term" name="Term" value="mitochondrion inheritance">
   <button type="button" onclick="query()">Query term</button><br>
@@ -84,7 +92,13 @@
     <span>def:&nbsp;</span><span id="term-def"></span><br/>
     <span>synonym:&nbsp;</span><span id="term-syn"></span><br/>
   </p>
-  <p id="pmid-output">
+  <p id="pmid-output"></p>
+  <p id="ext-output" style="display: none">
+    <span>term:&nbsp;</span><span id="ext-term"></span><br/>
+    <span>namespace:&nbsp;</span><span id="ext-ns"></span><br/>
+    <span>id:&nbsp;</span><span  id="ext-id"></span><br/>
+    <span>synonym:&nbsp;</span><span id="ext-syn"></span><br/>
+    <span>definition:&nbsp;</span><span id="ext-def"></span><br/>
   </p>
 </body>
 </html>
