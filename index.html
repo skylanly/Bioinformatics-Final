@@ -100,6 +100,8 @@
     xml = parser.parseFromString(response,"text/xml").documentElement.innerHTML;
     // parse body part of DOM
     html = parser.parseFromString(xml,"text/html");
+	
+    document.getElementById("output").innerHTML = "Content processing..."
     // abstract part has an unique tag name
     var element = html.getElementsByTagName("abstracttext")[0];
     if(element){
@@ -109,6 +111,7 @@
 
       for (var i = 0; i < PMID_list.length; i++)
       {
+	    document.getElementById("output").innerHTML = "Processing progress: " + String(i/PMID_list.length*100).substring(0,4) + "%"
         var term = PMID_list[i].toLowerCase();
         var result = term.match(/[a-zA-Z][a-zA-Z0-9\-]+/);
         var need_search = true;
