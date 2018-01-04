@@ -110,7 +110,7 @@
       for (var i = 0; i < PMID_list.length; i++)
       {
         var term = PMID_list[i].toLowerCase();
-        var result = term.match(/[a-zA-Z][a-zA-Z0-9]+/);
+        var result = term.match(/[a-zA-Z][a-zA-Z0-9\-]+/);
         var need_search = true;
         if (result) {
           term = result[0];
@@ -119,32 +119,25 @@
           need_search = false;
         }
         var proper_noun = words_list.indexOf(term);
-
-        if (proper_noun !=-1 || !need_search)
-        {
-          var newElement = document.createElement('span');
-          var newText = document.createTextNode(PMID_list[i]);
-          newElement.appendChild(newText);
-          document.getElementById("pmid-output").appendChild(newElement);
-          document.getElementById("pmid-output").appendChild(document.createTextNode(" "));
-        }
-        //propernoun
-        else
+        
+        var newElement = document.createElement('span');
+        // if not in the dictionary than may be a prooper noun
+        if (proper_noun ==-1 && need_search)
         {
           var xhttp = new XMLHttpRequest();
           term = encodeURI(term);
-          var sinlular = term.match(/(\S+)s/)
+          var sinlular = term.match(/(\S+)s$/)
           if(sinlular){
             term = sinlular[1]
           }
+          console.log(term)
           var url = "https://grch37.rest.ensembl.org/ontology/name/" + term + "?";
           xhttp.open("GET", url, false);
           xhttp.setRequestHeader("Content-type", "application/json");
           xhttp.send();
           var response = JSON.parse(xhttp.responseText);
-          var newElement = document.createElement('span');
-          newElement.style["text-decoration"] = "underline";
           if (!response["error"]){
+            newElement.style["text-decoration"] = "underline";
             newElement.id = "word" + i;
             newElement.addEventListener("click", (function () {
               var name = newElement.id;
@@ -154,12 +147,11 @@
             })());
             hash_table[PMID_list[i]] = response[0];
           }
-          var newText = document.createTextNode(PMID_list[i]);
-          newElement.appendChild(newText);
-          document.getElementById("pmid-output").appendChild(newElement);
-          document.getElementById("pmid-output").appendChild(document.createTextNode(" "));
         }
-
+        var newText = document.createTextNode(PMID_list[i]);
+        newElement.appendChild(newText);
+        document.getElementById("pmid-output").appendChild(newElement);
+        document.getElementById("pmid-output").appendChild(document.createTextNode(" "));
       }
       document.getElementById("output").innerHTML = "PMID found.";
       document.getElementById("pmid-output").style["display"] = "block";
