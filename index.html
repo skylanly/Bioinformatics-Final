@@ -4,6 +4,25 @@
   <title>Bioinformatics</title>
 </head>
 <script>
+  function show_all_data(){
+    document.getElementById("output").innerHTML = "Data fetching.";
+    document.getElementById("term-output").style["display"] = "none";
+    document.getElementById("pmid-output").style["display"] = "none";
+    var xhttp = new XMLHttpRequest();
+    var url = "http://rest.ensembl.org/info/species?";
+    xhttp.open("GET", url , false);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send();
+    var response = JSON.parse(xhttp.responseText);
+    
+    var len=response["species"].length;
+    document.getElementById("output").innerHTML = "";
+    for(var i=0 ; i<len ; i++)
+    {
+        var name = response["species"][i]["name"]
+        document.getElementById("output").innerHTML += name + "<br>"
+    }
+  }
   // get JSON data and update data block
   function show_query(data){
     // update data
@@ -79,7 +98,7 @@
   })();
 </script>
 <body >
-  <button type="button" onclick="">Show all data</button><br>
+  <button type="button" onclick="show_all_data()">Show all data</button><br>
   <input type="text" id="Term" name="Term" value="mitochondrion inheritance">
   <button type="button" onclick="query()">Query term</button><br>
   <input type="text" id="PMID" name="PMID" value="26318936">
