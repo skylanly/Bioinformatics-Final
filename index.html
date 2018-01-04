@@ -17,6 +17,7 @@
     document.getElementById("term-output").style["display"] = "none";
     document.getElementById("pmid-output").style["display"] = "none";
     document.getElementById("data-output").style["display"] = "none";
+    document.getElementById("ext-output").style["display"] = "none";
     var xhttp = new XMLHttpRequest();
     var url = "https://rest.ensembl.org/info/species?";
     xhttp.open("GET", url , false);
@@ -46,6 +47,15 @@
     // let output visible
     document.getElementById("term-output").style["display"] = "block";
   }
+  function show_extend(name) {
+    var data = hash_table[document.getElementById(name).innerHTML]
+    document.getElementById("ext-id").innerHTML = data["accession"];
+    document.getElementById("ext-term").innerHTML = data["name"];
+    document.getElementById("ext-ns").innerHTML = data["namespace"];
+    document.getElementById("ext-def").innerHTML = data["definition"];
+    document.getElementById("ext-syn").innerHTML = data["synonyms"];
+    document.getElementById("ext-output").style["display"] = "block";
+  }
   // make a name query to database
   function query(){
     // waiting message
@@ -53,6 +63,7 @@
     document.getElementById("term-output").style["display"] = "none";
     document.getElementById("pmid-output").style["display"] = "none";
     document.getElementById("data-output").style["display"] = "none";
+    document.getElementById("ext-output").style["display"] = "none";
     // make request
     name=document.getElementById("Term").value;
     var xhttp = new XMLHttpRequest();
@@ -75,11 +86,11 @@
     document.getElementById("term-output").style["display"] = "none";
     document.getElementById("pmid-output").style["display"] = "none";
     document.getElementById("data-output").style["display"] = "none";
+    document.getElementById("ext-output").style["display"] = "none";
     // use CORS proxy to get cross-domain data from PubMed
     pmid=document.getElementById("PMID").value;
     var xhttp = new XMLHttpRequest();
     var url = "https://cors-anywhere.herokuapp.com/https://www.ncbi.nlm.nih.gov/pubmed/"+pmid;
-    console.log(url)
     xhttp.open("GET", url , false);
     xhttp.setRequestHeader("Content-type", "text/plain");
     xhttp.send();
@@ -92,9 +103,65 @@
     // abstract part has an unique tag name
     var element = html.getElementsByTagName("abstracttext")[0];
     if(element){
-      document.getElementById("output").innerHTML = "PMID found."
+      document.getElementById("pmid-output").innerHTML = "";
       var text = element.innerHTML;
-      document.getElementById("pmid-output").innerHTML = text;
+      var PMID_list = text.split(" ");
+
+      for (var i = 0; i < PMID_list.length; i++)
+      {
+        var term = PMID_list[i].toLowerCase();
+        var result = term.match(/[a-zA-Z][a-zA-Z0-9]+/);
+        var need_search = true;
+        if (result) {
+          term = result[0];
+        }
+        else{
+          need_search = false;
+        }
+        var proper_noun = words_list.indexOf(term);
+
+        if (proper_noun !=-1 || !need_search)
+        {
+          var newElement = document.createElement('span');
+          var newText = document.createTextNode(PMID_list[i]);
+          newElement.appendChild(newText);
+          document.getElementById("pmid-output").appendChild(newElement);
+          document.getElementById("pmid-output").appendChild(document.createTextNode(" "));
+        }
+        //propernoun
+        else
+        {
+          var xhttp = new XMLHttpRequest();
+          term = encodeURI(term);
+          var sinlular = term.match(/(\S+)s/)
+          if(sinlular){
+            term = sinlular[1]
+          }
+          var url = "https://grch37.rest.ensembl.org/ontology/name/" + term + "?";
+          xhttp.open("GET", url, false);
+          xhttp.setRequestHeader("Content-type", "application/json");
+          xhttp.send();
+          var response = JSON.parse(xhttp.responseText);
+          var newElement = document.createElement('span');
+          newElement.style["text-decoration"] = "underline";
+          if (!response["error"]){
+            newElement.id = "word" + i;
+            newElement.addEventListener("click", (function () {
+              var name = newElement.id;
+              return function () {
+                show_extend(name);
+              }
+            })());
+            hash_table[PMID_list[i]] = response[0];
+          }
+          var newText = document.createTextNode(PMID_list[i]);
+          newElement.appendChild(newText);
+          document.getElementById("pmid-output").appendChild(newElement);
+          document.getElementById("pmid-output").appendChild(document.createTextNode(" "));
+        }
+
+      }
+      document.getElementById("output").innerHTML = "PMID found.";
       document.getElementById("pmid-output").style["display"] = "block";
     }
     else{
@@ -108,10 +175,11 @@
     xhttp.send();
     var response = xhttp.responseText;
     words_list = response.split("\r\n");
+    hash_table = {};
   })();
 </script>
 <style>
-  #term-def {
+  .definition {
     margin-top: 5px;
     width: 750px;
     padding: 10px;
@@ -119,7 +187,7 @@
   }
 </style>
 <body>
-  <div style="width: 800px; margin-left: auto; margin-right: auto; padding: 10px">
+  <div style="width: 800px; margin-left: auto; margin-right: auto; padding-top: 10px">
   <div>
     <button type="button" onclick="show_all_data()" class="btn btn-primary">Show all data</button>
   </div><br>
@@ -164,21 +232,36 @@
     </li>
     <li class="list-group-item">
       <button type="button" class="btn btn-primary">Definition</button><br>
-      <div class="btn-light" id="term-def"></div>
+      <div class="btn-light definition" id="term-def"></div>
     </li>
     <li class="list-group-item">
       <button type="button" class="btn btn-primary">Synonyms</button>
-      <button type="button" class="btn btn-light" id="term-syn">Light</button>
+      <button type="button" class="btn btn-light" id="term-syn"></button>
     </li>
   </ul>
-  <p id="pmid-output"></p>
-  <p id="ext-output" style="display: none">
-    <span>term:&nbsp;</span><span id="ext-term"></span><br/>
-    <span>namespace:&nbsp;</span><span id="ext-ns"></span><br/>
-    <span>id:&nbsp;</span><span  id="ext-id"></span><br/>
-    <span>synonym:&nbsp;</span><span id="ext-syn"></span><br/>
-    <span>definition:&nbsp;</span><span id="ext-def"></span><br/>
-  </p>
+  <div class="alert alert-light" id="pmid-output"></div>
+  <ul class="list-group" id="ext-output" style="display: none">
+    <li class="list-group-item">
+      <button type="button" class="btn btn-primary">Term</button>
+      <button type="button" class="btn btn-light" id="ext-term"></button>
+    </li>
+    <li class="list-group-item">
+      <button type="button" class="btn btn-primary">Namespace</button>
+      <button type="button" class="btn btn-light" id="ext-ns"></button>
+    </li>
+    <li class="list-group-item">
+      <button type="button" class="btn btn-primary">ID</button>
+      <button type="button" class="btn btn-light" id="ext-id"></button>
+    </li>
+    <li class="list-group-item">
+      <button type="button" class="btn btn-primary">Synonyms</button>
+      <button type="button" class="btn btn-light" id="ext-syn"></button>
+    </li>
+    <li class="list-group-item">
+      <button type="button" class="btn btn-primary">Definition</button>
+      <div class="btn-light definition" id="ext-def"></div>
+    </li>
+  </li>
   </div>
 </body>
 </html>
