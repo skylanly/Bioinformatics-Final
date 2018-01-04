@@ -5,7 +5,7 @@
 </head>
 <script>
   function show_all_data(){
-    document.getElementById("output").innerHTML = "Data fetching.";
+    document.getElementById("output").innerHTML = "Data fetching."
     document.getElementById("term-output").style["display"] = "none";
     document.getElementById("pmid-output").style["display"] = "none";
     var xhttp = new XMLHttpRequest();
@@ -90,7 +90,7 @@
   }
   (function load(){
     var xhttp = new XMLHttpRequest();
-    xhttp.open("GET", "/words_alpha.txt" , false);
+    xhttp.open("GET", "./words_alpha.txt" , false);
     xhttp.setRequestHeader("Content-type", "text/plain");
     xhttp.send();
     var response = xhttp.responseText;
