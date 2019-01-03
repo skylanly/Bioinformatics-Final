@@ -19,7 +19,7 @@
     document.getElementById("data-output").style["display"] = "none";
     document.getElementById("ext-output").style["display"] = "none";
     var xhttp = new XMLHttpRequest();
-    var url = "https://rest.ensembl.org/info/species?";
+    var url = "https://drive.google.com/open?id=1uBIEd66LhVsG-1H3rC4YhGl1c6amu4r7";
     xhttp.open("GET", url , false);
     xhttp.setRequestHeader("Content-type", "application/json");
     xhttp.send();
@@ -103,11 +103,14 @@
 	
     document.getElementById("output").innerHTML = "Content processing..."
     // abstract part has an unique tag name
-    var element = html.getElementsByTagName("abstracttext")[0];
+    var element = html.getElementsByClassName("abstr")[0];
     if(element){
+      
+      element = element.childNodes[1].childNodes[0].childNodes[0];
       document.getElementById("pmid-output").innerHTML = "";
-      var text = element.innerHTML;
+      var text = element.textContent;
       var PMID_list = text.split(" ");
+      console.log('7788 ')
 
       for (var i = 0; i < PMID_list.length; i++)
       {
@@ -141,6 +144,7 @@
           var response = JSON.parse(xhttp.responseText);
           if (!response["error"]){
             newElement.style["text-decoration"] = "underline";
+            newElement.style["font-weight"] = "bold";
             newElement.id = "word" + i;
             newElement.addEventListener("click", (function () {
               var name = newElement.id;
@@ -165,7 +169,7 @@
   }
   (function load(){
     var xhttp = new XMLHttpRequest();
-    xhttp.open("GET", "./words_alpha.txt" , false);
+    xhttp.open("GET", "https://cors-anywhere.herokuapp.com/https://aigecko.github.io/Bioinformatics-Final/words_alpha.txt" , false);
     xhttp.setRequestHeader("Content-type", "text/plain");
     xhttp.send();
     var response = xhttp.responseText;
